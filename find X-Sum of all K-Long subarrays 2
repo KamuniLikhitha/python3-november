@@ -1,0 +1,78 @@
+class Solution:
+    def findXSum(self, nums: List[int], k: int, x: int) -> List[int]:
+        n = len(nums)
+        freq = Counter()
+        top = SortedList()
+        rest = SortedList()
+        ans = []
+        total = 0
+        def add_item(val):
+            f_old = freq[val]
+            if f_old > 0:
+                tup = (f_old, val)
+                if tup in top:
+                    top.remove(tup)
+                    nonlocal total
+                    total -= f_old * val
+                else:
+                    rest.remove(tup)
+            freq[val] += 1
+            f_new = freq[val]
+            tup = (f_new, val)
+            if len(top) < x:
+                top.add(tup)
+                total += f_new * val
+            else:
+                if tup > top[0]:
+                    smallest = top.pop(0)
+                    total -= smallest[0] * smallest[1]
+                    rest.add(smallest)
+                    top.add(tup)
+                    total += f_new * val
+                else:
+                    rest.add(tup)
+        def remove_item(val):
+            f_old = freq[val]
+            tup = (f_old, val)
+            if tup in top:
+                top.remove(tup)
+                nonlocal total
+                total -= f_old * val
+            else:
+                rest.remove(tup)
+            freq[val] -= 1
+            f_new = freq[val]
+            if f_new > 0:
+                tup = (f_new, val)
+                if len(top) < x:
+                    top.add(tup)
+                    total += f_new * val
+                else:
+                    if tup > top[0]:
+                        smallest = top.pop(0)
+                        total -= smallest[0] * smallest[1]
+                        rest.add(smallest)
+                        top.add(tup)
+                        total += f_new * val
+                    else:
+                        rest.add(tup)
+            while len(top) < x and rest:
+                t = rest.pop(-1)
+                top.add(t)
+                total += t[0] * t[1]
+            while rest and top and rest[-1] > top[0]:
+                big = rest.pop(-1)
+                small = top.pop(0)
+                total += big[0] * big[1] - small[0] * small[1]
+                top.add(big)
+                rest.add(small)
+        for i in range(k):
+            add_item(nums[i])
+        ans.append(total)
+
+        for i in range(k, n):
+            remove_item(nums[i - k])
+            add_item(nums[i])
+            ans.append(total)
+        return ans
+        
