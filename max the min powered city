@@ -1,0 +1,35 @@
+class Solution:
+    def maxPower(self, stations: List[int], r: int, k: int) -> int:
+        n = len(stations)
+        pref = [0] * (n + 1)
+        for i in range(n):
+            pref[i + 1] = pref[i] + stations[i]
+        power = [0] * n
+        for i in range(n):
+            left = max(0, i - r)
+            right = min(n - 1, i + r)
+            power[i] = pref[right + 1] - pref[left]
+        def can(target: int) -> bool:
+            diff = [0] * (n + 1)
+            added_sum = 0
+            remaining = k
+            for i in range(n):
+                added_sum += diff[i]
+                cur = power[i] + added_sum
+                if cur < target:
+                    need = target - cur
+                    if need > remaining:
+                        return False
+                    remaining -= need
+                    added_sum += need
+                    end = min(n - 1, i + 2 * r)
+                    diff[end + 1] -= need
+            return True
+        lo, hi = min(power), max(power) + k
+        while lo < hi:
+            mid = (lo + hi + 1) // 2
+            if can(mid):
+                lo = mid
+            else:
+                hi = mid - 1
+        return lo
