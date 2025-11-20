@@ -1,0 +1,18 @@
+class Solution:
+    def intersectionSizeTwo(self, intervals: List[List[int]]) -> int:
+        intervals.sort(key = lambda x: (x[1],-x[0]))
+        ans = 0
+        secondlast = -10**18
+        last = -10**18
+        for a,b in intervals:
+            if a <= secondlast:
+                continue
+            if a > last:
+                ans += 2
+                secondlast = b-1
+                last = b
+            else:
+                ans += 1
+                secondlast = last
+                last = b
+        return ans
